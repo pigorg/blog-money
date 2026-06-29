@@ -55,7 +55,7 @@ try {
     $model = $db->query("SELECT valore FROM configurazioni WHERE chiave = 'claude_model'")->fetch_row()[0] ?? CLAUDE_MODEL;
 
     cronLog("--- Generazione ($articoliAlGiorno articolo/i) ---");
-    $generator = new Generator($database, CLAUDE_API_KEY, $model);
+    $generator = new ArticleGenerator($database, CLAUDE_API_KEY, $model);
 
     $generati = 0;
     for ($i = 0; $i < $articoliAlGiorno; $i++) {

@@ -22,9 +22,9 @@ Options -Indexes
     # RewriteCond %{HTTP_HOST} !^www\. [NC]
     # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-    # Forza HTTPS
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    # Forza HTTPS (disabilitato: gestito dal server/cPanel)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 </IfModule>
 
 # Compressione

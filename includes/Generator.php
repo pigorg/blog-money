@@ -3,7 +3,7 @@ require_once __DIR__ . '/Claude.php';
 require_once __DIR__ . '/ImageGenerator.php';
 require_once __DIR__ . '/helpers.php';
 
-class Generator {
+class ArticleGenerator {
     private $db;
     private $claude;
 

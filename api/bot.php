@@ -42,7 +42,7 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'genera') {
     }
 
     try {
-        $generator = new Generator($database, $apiKey, CLAUDE_MODEL);
+        $generator = new ArticleGenerator($database, $apiKey, CLAUDE_MODEL);
         $articolo_id = $generator->generaArticolo($titoloId);
         rispondiJSON([
             'tipo' => 'success',
@@ -77,7 +77,7 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'sincronizza_tutte') {
 
 // POST /api/bot.php { azione: 'pubblica_schedulati' }
 if ($metodo === 'POST' && ($body['azione'] ?? '') === 'pubblica_schedulati') {
-    $generator = new Generator($database, CLAUDE_API_KEY ?: 'placeholder', CLAUDE_MODEL);
+    $generator = new ArticleGenerator($database, CLAUDE_API_KEY ?: 'placeholder', CLAUDE_MODEL);
     $n = $generator->pubblicaSchedulati();
     rispondiJSON(['tipo' => 'success', 'messaggio' => "$n articoli pubblicati.", 'pubblicati' => $n]);
 }
