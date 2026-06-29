@@ -1,15 +1,4 @@
 <?php
-function loadEnv() {
-    $envFile = dirname(__DIR__) . '/.env';
-    if (file_exists($envFile)) {
-        $vars = parse_ini_file($envFile);
-        foreach ($vars as $k => $v) {
-            $_ENV[$k] = $v;
-            putenv("$k=$v");
-        }
-    }
-}
-
 function generaSlug($testo) {
     $slug = mb_strtolower(trim($testo), 'UTF-8');
 

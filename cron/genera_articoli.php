@@ -15,16 +15,14 @@ function cronLog($msg) {
 
 cronLog('=== AVVIO CRON genera_articoli.php ===');
 
+require_once BASE_DIR . '/config.php';
 require_once BASE_DIR . '/includes/helpers.php';
 require_once BASE_DIR . '/includes/Database.php';
 require_once BASE_DIR . '/includes/Scraper.php';
 require_once BASE_DIR . '/includes/Generator.php';
 
-loadEnv();
-
-$apiKey = $_ENV['CLAUDE_API_KEY'] ?? '';
-if (!$apiKey) {
-    cronLog('ERRORE: CLAUDE_API_KEY non configurata in .env');
+if (!CLAUDE_API_KEY) {
+    cronLog('ERRORE: CLAUDE_API_KEY non configurata in config.php');
     exit(1);
 }
 
@@ -54,10 +52,10 @@ try {
 
     // STEP 2: Genera articoli (quanti configurati)
     $articoliAlGiorno = (int)($db->query("SELECT valore FROM configurazioni WHERE chiave = 'articoli_al_giorno'")->fetch_row()[0] ?? 1);
-    $model = $_ENV['CLAUDE_MODEL'] ?? ($db->query("SELECT valore FROM configurazioni WHERE chiave = 'claude_model'")->fetch_row()[0] ?? 'claude-sonnet-4-6');
+    $model = $db->query("SELECT valore FROM configurazioni WHERE chiave = 'claude_model'")->fetch_row()[0] ?? CLAUDE_MODEL;
 
     cronLog("--- Generazione ($articoliAlGiorno articolo/i) ---");
-    $generator = new Generator($database, $apiKey, $model);
+    $generator = new Generator($database, CLAUDE_API_KEY, $model);
 
     $generati = 0;
     for ($i = 0; $i < $articoliAlGiorno; $i++) {

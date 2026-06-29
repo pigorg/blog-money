@@ -1,7 +1,7 @@
 <?php
+require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/includes/helpers.php';
 require_once dirname(__DIR__) . '/includes/Database.php';
-loadEnv();
 
 $database = new Database();
 $database->connect();
@@ -49,7 +49,7 @@ $articoli = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 // Categorie disponibili
 $cats = $db->query("SELECT DISTINCT categoria FROM articoli WHERE stato = 'pubblicato' ORDER BY categoria ASC")->fetch_all(MYSQLI_ASSOC);
 
-$siteUrl = $_ENV['SITE_URL'] ?? '';
+$siteUrl = SITE_URL;
 ?>
 <!DOCTYPE html>
 <html lang="it">

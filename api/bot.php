@@ -25,9 +25,9 @@ if ($metodo === 'GET' && $azione === 'titoli_da_elaborare') {
 
 // POST /api/bot.php { azione: 'genera' }
 if ($metodo === 'POST' && ($body['azione'] ?? '') === 'genera') {
-    $apiKey = $_ENV['CLAUDE_API_KEY'] ?? '';
+    $apiKey = CLAUDE_API_KEY;
     if (!$apiKey) {
-        rispondiJSON(['tipo' => 'error', 'messaggio' => 'CLAUDE_API_KEY non configurata nel .env'], 500);
+        rispondiJSON(['tipo' => 'error', 'messaggio' => 'CLAUDE_API_KEY non configurata in config.php'], 500);
     }
 
     // Cerca titolo_id specifico o prendi il primo disponibile
@@ -42,8 +42,7 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'genera') {
     }
 
     try {
-        $model = $_ENV['CLAUDE_MODEL'] ?? 'claude-sonnet-4-6';
-        $generator = new Generator($database, $apiKey, $model);
+        $generator = new Generator($database, $apiKey, CLAUDE_MODEL);
         $articolo_id = $generator->generaArticolo($titoloId);
         rispondiJSON([
             'tipo' => 'success',
@@ -78,9 +77,7 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'sincronizza_tutte') {
 
 // POST /api/bot.php { azione: 'pubblica_schedulati' }
 if ($metodo === 'POST' && ($body['azione'] ?? '') === 'pubblica_schedulati') {
-    $apiKey = $_ENV['CLAUDE_API_KEY'] ?? '';
-    $model  = $_ENV['CLAUDE_MODEL'] ?? 'claude-sonnet-4-6';
-    $generator = new Generator($database, $apiKey ?: 'placeholder', $model);
+    $generator = new Generator($database, CLAUDE_API_KEY ?: 'placeholder', CLAUDE_MODEL);
     $n = $generator->pubblicaSchedulati();
     rispondiJSON(['tipo' => 'success', 'messaggio' => "$n articoli pubblicati.", 'pubblicati' => $n]);
 }

@@ -7,11 +7,10 @@
 
 define('BASE_DIR', dirname(__DIR__));
 
+require_once BASE_DIR . '/config.php';
 require_once BASE_DIR . '/includes/helpers.php';
 require_once BASE_DIR . '/includes/Database.php';
 require_once BASE_DIR . '/includes/Scraper.php';
-
-loadEnv();
 
 $log = function($msg) {
     echo '[' . date('H:i:s') . '] ' . $msg . PHP_EOL;

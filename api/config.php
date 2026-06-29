@@ -8,10 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/includes/helpers.php';
 require_once dirname(__DIR__) . '/includes/Database.php';
-
-loadEnv();
 
 try {
     $database = new Database();

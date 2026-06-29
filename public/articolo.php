@@ -1,8 +1,8 @@
 <?php
+require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/includes/helpers.php';
 require_once dirname(__DIR__) . '/includes/Database.php';
 require_once dirname(__DIR__) . '/includes/Template.php';
-loadEnv();
 
 $database = new Database();
 $database->connect();

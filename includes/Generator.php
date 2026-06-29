@@ -90,7 +90,7 @@ class Generator {
     }
 
     private function pianificaPubblicazione($articolo_id) {
-        $ora = $_ENV['ORARIO_PUBBLICAZIONE'] ?? '09:00';
+        $ora = ORARIO_PUBBLICAZIONE;
         $dataPub = date('Y-m-d') . ' ' . $ora . ':00';
 
         // Se l'orario è già passato, schedula per domani

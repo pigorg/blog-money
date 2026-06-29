@@ -1,4 +1,4 @@
-.env
+config.php
 cron/log.txt
 vendor/
 *.log
