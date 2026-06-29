@@ -1,6 +1,7 @@
 <?php
-define('CLAUDE_API_KEY', 'your_claude_api_key_here');
-define('CLAUDE_MODEL',   'claude-sonnet-4-6');
+define('CLAUDE_API_KEY',  'your_claude_api_key_here');
+define('CLAUDE_MODEL',    'claude-sonnet-4-6');
+define('TOGETHER_API_KEY', 'your_together_api_key_here');
 
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'blog_money');

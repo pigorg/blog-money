@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /cron/
+Disallow: /uploads/immagini/
+
+Sitemap: https://tuosito.com/sitemap.php

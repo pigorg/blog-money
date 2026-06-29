@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/Claude.php';
+require_once __DIR__ . '/ImageGenerator.php';
 require_once __DIR__ . '/helpers.php';
 
 class Generator {
@@ -33,6 +34,26 @@ class Generator {
             $approfondimento
         );
 
+        // Fase 3: generazione immagini AI
+        $immagineGrandeUrl  = null;
+        $immaginePiccolaUrl = null;
+        $immagineAlt        = $dati['immagine_alt'] ?? $dati['titolo'];
+        $immaginePiccolaAlt = $dati['immagine_piccola_alt'] ?? $dati['titolo'];
+
+        if (!empty($dati['immagine_grande_prompt']) && defined('TOGETHER_API_KEY') && TOGETHER_API_KEY) {
+            try {
+                $imageGen = new ImageGenerator(
+                    TOGETHER_API_KEY,
+                    dirname(__DIR__) . '/uploads/immagini/',
+                    SITE_URL . '/uploads/immagini/'
+                );
+                $immagineGrandeUrl  = $imageGen->genera($dati['immagine_grande_prompt'], 1280, 720);
+                $immaginePiccolaUrl = $imageGen->genera($dati['immagine_piccola_prompt'], 512, 512);
+            } catch (Exception $e) {
+                logDB($this->db, 'generazione', 'Immagini non generate: ' . $e->getMessage(), 'warning');
+            }
+        }
+
         // Genera slug unico
         $slug = $this->slugUnico($dati['titolo']);
 
@@ -41,12 +62,12 @@ class Generator {
 
         $stmt = $this->db->prepare(
             'INSERT INTO articoli
-            (titolo_estratto_id, titolo_finale, slug, contenuto, excerpt, meta_description, keywords, categoria, fonte_url, tempo_lettura, stato)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "draft")'
+            (titolo_estratto_id, titolo_finale, slug, contenuto, excerpt, meta_description, keywords, categoria, fonte_url, tempo_lettura, immagine_url, immagine_alt, immagine_piccola_url, immagine_piccola_alt, stato)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "draft")'
         );
 
         $stmt->bind_param(
-            'issssssssi',
+            'isssssssssissss',
             $titolo_estratto_id,
             $dati['titolo'],
             $slug,
@@ -56,7 +77,11 @@ class Generator {
             $dati['keywords'],
             $titolo['categoria'],
             $titolo['url_originale'],
-            $tempoLettura
+            $tempoLettura,
+            $immagineGrandeUrl,
+            $immagineAlt,
+            $immaginePiccolaUrl,
+            $immaginePiccolaAlt
         );
         $stmt->execute();
         $articolo_id = $this->db->insert_id;

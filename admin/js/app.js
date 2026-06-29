@@ -176,7 +176,7 @@ createApp({
         },
 
         apriArticolo(slug) {
-            window.open(`../public/articolo.php?slug=${slug}`, '_blank');
+            window.open(`../articolo.php?slug=${slug}`, '_blank');
         },
 
         mostraNotifica(tipo, messaggio) {

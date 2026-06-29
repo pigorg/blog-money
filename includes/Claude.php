@@ -12,6 +12,8 @@ class Claude {
     public function approfondisci($titolo) {
         $prompt = "Sei un esperto di finanza e investimenti. Approfondisci questo argomento finanziario: \"$titolo\"
 
+Rispondi SEMPRE in italiano, anche se il titolo è in inglese.
+
 Fornisci SOLO un JSON valido con questa struttura:
 {
   \"contesto\": \"Spiegazione del contesto e background (2-3 paragrafi)\",
@@ -43,6 +45,10 @@ ISTRUZIONI:
 - Integra naturalmente le keywords SEO
 - NON usare markdown, solo HTML puro
 
+Per le immagini crea prompt in inglese adatti a un modello text-to-image (FLUX):
+- immagine_grande_prompt: scena finanziaria fotorealistica, orizzontale 16:9, cinematic lighting
+- immagine_piccola_prompt: dettaglio o elemento correlato all'articolo, quadrata, close-up
+
 Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
 {
   \"titolo\": \"Titolo SEO ottimizzato (max 70 caratteri)\",
@@ -50,7 +56,11 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
   \"meta_description\": \"Meta description SEO (max 160 caratteri)\",
   \"keywords\": \"keyword1, keyword2, keyword3, keyword4, keyword5\",
   \"contenuto\": \"<h2>...</h2><p>...</p> (HTML completo articolo 1500+ parole)\",
-  \"tempo_lettura\": 7
+  \"tempo_lettura\": 7,
+  \"immagine_grande_prompt\": \"photorealistic financial scene, ..., cinematic lighting, 16:9\",
+  \"immagine_piccola_prompt\": \"close-up of ..., square format, sharp focus\",
+  \"immagine_alt\": \"Descrizione immagine principale in italiano\",
+  \"immagine_piccola_alt\": \"Descrizione immagine secondaria in italiano\"
 }";
 
         $testo = $this->call($prompt, 4000);

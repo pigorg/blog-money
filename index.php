@@ -56,8 +56,27 @@ $siteUrl = SITE_URL;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Money - Notizie e Consigli Finanziari</title>
-    <meta name="description" content="Articoli di finanza, investimenti, criptovalute e risparmio aggiornati ogni giorno.">
+    <title><?= $categoria ? htmlspecialchars($categoria) . ' - Blog Money' : 'Blog Money - Notizie e Consigli Finanziari' ?></title>
+    <meta name="description" content="<?= $categoria ? 'Articoli di ' . htmlspecialchars($categoria) . ' aggiornati ogni giorno con AI.' : 'Articoli di finanza, investimenti, criptovalute e risparmio aggiornati ogni giorno.' ?>">
+    <link rel="canonical" href="<?= SITE_URL ?>/<?= $categoria ? '?categoria=' . urlencode($categoria) : '' ?>">
+    <meta property="og:title" content="<?= $categoria ? htmlspecialchars($categoria) . ' - Blog Money' : 'Blog Money' ?>">
+    <meta property="og:description" content="Articoli di finanza e investimenti aggiornati ogni giorno con intelligenza artificiale.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= SITE_URL ?>/">
+    <meta property="og:site_name" content="Blog Money">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Blog Money - Notizie Finanziarie">
+    <meta name="twitter:description" content="Articoli di finanza e investimenti aggiornati ogni giorno.">
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context'   => 'https://schema.org',
+        '@type'      => 'WebSite',
+        'name'       => 'Blog Money',
+        'url'        => SITE_URL,
+        'inLanguage' => 'it-IT',
+        'description'=> 'Articoli di finanza, investimenti, criptovalute e risparmio aggiornati ogni giorno.',
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/public.css">

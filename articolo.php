@@ -52,14 +52,59 @@ $dataLeggibile = $articolo['data_pubblicazione'] ? date('d M Y', strtotime($arti
     <?php if ($articolo['keywords']): ?>
     <meta name="keywords" content="<?= htmlspecialchars($articolo['keywords']) ?>">
     <?php endif; ?>
+    <link rel="canonical" href="<?= SITE_URL ?>/articolo.php?slug=<?= urlencode($articolo['slug']) ?>">
 
     <!-- Open Graph -->
     <meta property="og:title" content="<?= htmlspecialchars($articolo['titolo_finale']) ?>">
     <meta property="og:description" content="<?= htmlspecialchars($articolo['excerpt'] ?? '') ?>">
     <meta property="og:type" content="article">
+    <meta property="og:url" content="<?= SITE_URL ?>/articolo.php?slug=<?= urlencode($articolo['slug']) ?>">
+    <meta property="og:site_name" content="Blog Money">
+    <meta property="article:published_time" content="<?= $articolo['data_pubblicazione'] ? date('c', strtotime($articolo['data_pubblicazione'])) : '' ?>">
+    <meta property="article:section" content="<?= htmlspecialchars($articolo['categoria']) ?>">
     <?php if ($articolo['immagine_url']): ?>
     <meta property="og:image" content="<?= htmlspecialchars($articolo['immagine_url']) ?>">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="720">
     <?php endif; ?>
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= htmlspecialchars($articolo['titolo_finale']) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars($articolo['excerpt'] ?? '') ?>">
+    <?php if ($articolo['immagine_url']): ?>
+    <meta name="twitter:image" content="<?= htmlspecialchars($articolo['immagine_url']) ?>">
+    <?php endif; ?>
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'Article',
+        'headline'        => $articolo['titolo_finale'],
+        'description'     => $articolo['excerpt'] ?? '',
+        'image'           => $articolo['immagine_url'] ? [$articolo['immagine_url']] : [],
+        'keywords'        => $articolo['keywords'] ?? '',
+        'articleSection'  => $articolo['categoria'],
+        'inLanguage'      => 'it-IT',
+        'datePublished'   => $articolo['data_pubblicazione'] ? date('c', strtotime($articolo['data_pubblicazione'])) : '',
+        'dateModified'    => $articolo['data_pubblicazione'] ? date('c', strtotime($articolo['data_pubblicazione'])) : '',
+        'author'          => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
+        'publisher'       => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
+        'mainEntityOfPage'=> ['@type' => 'WebPage', '@id' => SITE_URL . '/articolo.php?slug=' . urlencode($articolo['slug'])],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    </script>
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',                              'item' => SITE_URL . '/'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $articolo['categoria'],              'item' => SITE_URL . '/?categoria=' . urlencode($articolo['categoria'])],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $articolo['titolo_finale']],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -127,7 +172,24 @@ $dataLeggibile = $articolo['data_pubblicazione'] ? date('d M Y', strtotime($arti
                 <?php endif; ?>
 
                 <div class="prose-content">
-                    <?= $articolo['contenuto'] ?>
+                    <?php
+                    // Inserisce l'immagine piccola dopo il primo paragrafo
+                    if ($articolo['immagine_piccola_url']) {
+                        $contenuto = $articolo['contenuto'];
+                        $pos = strpos($contenuto, '</p>');
+                        if ($pos !== false) {
+                            $imgHtml = '<figure class="float-right ml-6 mb-4 w-48 sm:w-64 clear-right">
+                                <img src="' . htmlspecialchars($articolo['immagine_piccola_url']) . '"
+                                     alt="' . htmlspecialchars($articolo['immagine_piccola_alt'] ?? '') . '"
+                                     class="rounded-xl shadow-md w-full object-cover" loading="lazy">
+                            </figure>';
+                            $contenuto = substr($contenuto, 0, $pos + 4) . $imgHtml . substr($contenuto, $pos + 4);
+                        }
+                        echo $contenuto;
+                    } else {
+                        echo $articolo['contenuto'];
+                    }
+                    ?>
                 </div>
 
                 <?php if ($articolo['fonte_url']): ?>

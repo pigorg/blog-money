@@ -15,8 +15,16 @@ Options -Indexes
     RewriteRule ^includes/ - [F,L]
     RewriteRule ^cron/ - [F,L]
 
-    # URL puliti per articoli (opzionale)
-    # RewriteRule ^articolo/([a-z0-9-]+)/?$ public/articolo.php?slug=$1 [QSA,L]
+    # Sitemap XML → PHP dinamico
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+    # Forza www (decommenta se vuoi www obbligatorio)
+    # RewriteCond %{HTTP_HOST} !^www\. [NC]
+    # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # Forza HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 </IfModule>
 
 # Compressione
