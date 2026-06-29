@@ -1,0 +1,117 @@
+/* Blog Money - Public Styles */
+
+/* Prose content (articolo body) */
+.prose-content {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: #374151;
+}
+
+.prose-content h2 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    font-weight: 700;
+    color: #111827;
+    margin: 2rem 0 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.prose-content h3 {
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1.5rem 0 .75rem;
+}
+
+.prose-content p {
+    margin-bottom: 1.25rem;
+}
+
+.prose-content ul,
+.prose-content ol {
+    margin: 1rem 0 1.25rem 1.5rem;
+}
+
+.prose-content li {
+    margin-bottom: .5rem;
+}
+
+.prose-content strong {
+    font-weight: 700;
+    color: #111827;
+}
+
+.prose-content a {
+    color: #2563eb;
+    text-decoration: underline;
+    text-decoration-color: #93c5fd;
+}
+
+.prose-content a:hover {
+    color: #1d4ed8;
+}
+
+.prose-content blockquote {
+    border-left: 4px solid #3b82f6;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    background: #f0f7ff;
+    color: #374151;
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+.prose-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: .95rem;
+}
+
+.prose-content th {
+    background: #f3f4f6;
+    padding: .75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.prose-content td {
+    padding: .6rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.prose-content tr:hover td {
+    background: #f9fafb;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reading progress bar */
+#progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    z-index: 100;
+    transition: width .1s;
+}

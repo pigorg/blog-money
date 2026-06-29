@@ -1,0 +1,6 @@
+.env
+cron/log.txt
+vendor/
+*.log
+.DS_Store
+Thumbs.db

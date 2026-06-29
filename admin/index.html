@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Money - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        [v-cloak] { display: none; }
+        .fade-enter-active, .fade-leave-active { transition: opacity .2s; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen" v-cloak>
+<div id="app">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                <span class="text-xl font-bold text-gray-800">Blog Money <span class="text-blue-600">Admin</span></span>
+            </div>
+
+            <!-- Desktop menu -->
+            <div class="hidden md:flex gap-1">
+                <button v-for="t in tabs" :key="t.id"
+                    @click="tab = t.id"
+                    :class="tab === t.id ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'"
+                    class="px-4 py-2 rounded-lg transition font-medium flex items-center gap-2">
+                    <i :class="t.icon"></i> {{ t.label }}
+                </button>
+            </div>
+
+            <!-- Mobile hamburger -->
+            <button @click="menuAperto = !menuAperto" class="md:hidden text-gray-600 text-xl p-2">
+                <i :class="menuAperto ? 'fas fa-times' : 'fas fa-bars'"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div v-show="menuAperto" class="md:hidden border-t bg-white px-4 py-2 flex flex-col gap-1">
+            <button v-for="t in tabs" :key="t.id"
+                @click="tab = t.id; menuAperto = false"
+                :class="tab === t.id ? 'bg-blue-600 text-white' : 'text-gray-100 hover:bg-gray-100 text-gray-700'"
+                class="px-4 py-2 rounded-lg text-left flex items-center gap-2">
+                <i :class="t.icon"></i> {{ t.label }}
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- STATISTICHE -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <p class="text-gray-500 text-sm">Totale Articoli</p>
+                <p class="text-3xl font-bold text-gray-800">{{ stats.totale }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <p class="text-gray-500 text-sm">Pubblicati</p>
+                <p class="text-3xl font-bold text-green-600">{{ stats.pubblicati }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <p class="text-gray-500 text-sm">Draft</p>
+                <p class="text-3xl font-bold text-yellow-600">{{ stats.draft }}</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <p class="text-gray-500 text-sm">Titoli in coda</p>
+                <p class="text-3xl font-bold text-blue-600">{{ stats.titoli }}</p>
+            </div>
+        </div>
+
+        <!-- TAB: ARTICOLI -->
+        <div v-show="tab === 'articoli'" class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-6 border-b flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-file-alt text-blue-600"></i> Articoli
+                </h2>
+                <div class="flex gap-2 flex-wrap">
+                    <select v-model="filtroStato" class="border rounded-lg px-3 py-2 text-sm">
+                        <option value="">Tutti gli stati</option>
+                        <option value="draft">Draft</option>
+                        <option value="pubblicato">Pubblicato</option>
+                        <option value="schedulato">Schedulato</option>
+                    </select>
+                    <button @click="caricaArticoli" class="bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm hover:bg-blue-100">
+                        <i class="fas fa-sync mr-1"></i> Aggiorna
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="caricamento.articoli" class="p-12 text-center text-gray-400">
+                <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+                <p>Caricamento...</p>
+            </div>
+
+            <div v-else-if="articoliFiltrati.length === 0" class="p-12 text-center text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3 opacity-40"></i>
+                <p>Nessun articolo trovato.</p>
+            </div>
+
+            <div v-else class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="text-left px-6 py-3 font-semibold text-gray-600">Titolo</th>
+                            <th class="hidden sm:table-cell text-left px-4 py-3 font-semibold text-gray-600">Categoria</th>
+                            <th class="hidden md:table-cell text-left px-4 py-3 font-semibold text-gray-600">Data</th>
+                            <th class="text-center px-4 py-3 font-semibold text-gray-600">Stato</th>
+                            <th class="text-center px-4 py-3 font-semibold text-gray-600">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="a in articoliFiltrati" :key="a.id" class="border-b hover:bg-gray-50 transition">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-gray-800 line-clamp-2">{{ a.titolo_finale }}</p>
+                                <p class="text-xs text-gray-400 mt-1 sm:hidden">{{ a.categoria }}</p>
+                            </td>
+                            <td class="hidden sm:table-cell px-4 py-4 text-gray-600">{{ a.categoria }}</td>
+                            <td class="hidden md:table-cell px-4 py-4 text-gray-500 text-xs">{{ formatData(a.data_creazione) }}</td>
+                            <td class="px-4 py-4 text-center">
+                                <span :class="badgeClasse(a.stato)" class="px-2 py-1 rounded-full text-xs font-semibold">
+                                    {{ a.stato }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-1 justify-center">
+                                    <button v-if="a.stato !== 'pubblicato'" @click="pubblicaArticolo(a.id)" title="Pubblica"
+                                        class="bg-green-100 text-green-700 hover:bg-green-200 p-2 rounded-lg transition">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </button>
+                                    <button @click="apriArticolo(a.slug)" title="Visualizza"
+                                        class="bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg transition">
+                                        <i class="fas fa-eye text-xs"></i>
+                                    </button>
+                                    <button @click="eliminaArticolo(a.id)" title="Elimina"
+                                        class="bg-red-100 text-red-700 hover:bg-red-200 p-2 rounded-lg transition">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: SORGENTI -->
+        <div v-show="tab === 'sorgenti'" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-link text-blue-600"></i> Sorgenti RSS
+                </h2>
+
+                <!-- Form aggiungi sorgente -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">Aggiungi Sorgente</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input v-model="nuovaSorgente.nome" placeholder="Nome sorgente" class="border rounded-lg px-3 py-2 text-sm">
+                        <input v-model="nuovaSorgente.url" placeholder="URL RSS" class="border rounded-lg px-3 py-2 text-sm sm:col-span-2">
+                    </div>
+                    <button @click="aggiungiSorgente" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                        <i class="fas fa-plus mr-1"></i> Aggiungi
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-for="s in sorgenti" :key="s.id" class="border rounded-xl p-4 hover:shadow-md transition bg-white">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-800">{{ s.nome }}</h3>
+                            <span class="text-xs px-2 py-1 rounded-full" :class="s.attiva ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'">
+                                {{ s.attiva ? 'Attiva' : 'Inattiva' }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-1 break-all">{{ s.url }}</p>
+                        <p class="text-xs text-gray-400 mb-4">Tipo: <strong>{{ s.tipo }}</strong> · Ultima sync: {{ formatData(s.ultima_sincronizzazione) || 'Mai' }}</p>
+                        <div class="flex gap-2">
+                            <button @click="sincronizzaSorgente(s.id)" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700">
+                                <i class="fas fa-sync mr-1"></i> Sincronizza
+                            </button>
+                            <button @click="eliminaSorgente(s.id)" class="bg-red-100 text-red-600 px-3 py-2 rounded-lg text-sm hover:bg-red-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: BOT -->
+        <div v-show="tab === 'bot'" class="space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <i class="fas fa-robot text-blue-600"></i> Controllo Bot
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    <button @click="botAzione('sincronizza_tutte')" :disabled="botOccupato"
+                        class="bg-indigo-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-indigo-700 disabled:opacity-50 transition">
+                        <i class="fas fa-cloud-download-alt mr-2"></i> Sincronizza Sorgenti
+                    </button>
+                    <button @click="botAzione('genera')" :disabled="botOccupato"
+                        class="bg-green-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 transition">
+                        <i :class="botOccupato ? 'fas fa-spinner fa-spin' : 'fas fa-magic'" class="mr-2"></i>
+                        {{ botOccupato ? 'Elaborazione...' : 'Genera Articolo' }}
+                    </button>
+                    <button @click="botAzione('pubblica_schedulati')" :disabled="botOccupato"
+                        class="bg-orange-500 text-white px-4 py-3 rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 transition">
+                        <i class="fas fa-calendar-check mr-2"></i> Pubblica Schedulati
+                    </button>
+                </div>
+
+                <!-- Notifica -->
+                <transition name="fade">
+                    <div v-if="notifica" :class="notifica.tipo === 'success' ? 'bg-green-50 border-green-400 text-green-800' : notifica.tipo === 'warning' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' : 'bg-red-50 border-red-400 text-red-800'"
+                        class="p-4 rounded-xl border-l-4 mb-6">
+                        <i :class="notifica.tipo === 'success' ? 'fas fa-check-circle' : notifica.tipo === 'warning' ? 'fas fa-exclamation-triangle' : 'fas fa-times-circle'" class="mr-2"></i>
+                        {{ notifica.messaggio }}
+                    </div>
+                </transition>
+
+                <!-- Titoli in coda -->
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-list text-gray-400"></i> Titoli in coda ({{ titoliCoda.length }})
+                    </h3>
+                    <div v-if="titoliCoda.length === 0" class="text-gray-400 text-sm">Nessun titolo in coda. Sincronizza le sorgenti.</div>
+                    <div v-else class="space-y-2 max-h-48 overflow-y-auto">
+                        <div v-for="t in titoliCoda" :key="t.id" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ t.categoria }}</span>
+                            <p class="text-sm text-gray-700 flex-1">{{ t.titolo_originale }}</p>
+                            <button @click="generaDaIdSpecifico(t.id)" :disabled="botOccupato"
+                                class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 disabled:opacity-50">
+                                Genera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log -->
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-terminal text-gray-400"></i> Log Elaborazioni
+                    </h3>
+                    <div class="bg-gray-900 rounded-xl p-4 max-h-80 overflow-y-auto font-mono text-xs space-y-1">
+                        <div v-if="log.length === 0" class="text-gray-500">Nessun log disponibile.</div>
+                        <div v-for="l in log" :key="l.id"
+                            :class="l.status === 'success' ? 'text-green-400' : l.status === 'warning' ? 'text-yellow-400' : 'text-red-400'">
+                            <span class="text-gray-500">{{ formatDataOra(l.created_at) }}</span>
+                            <span class="mx-2 opacity-50">[{{ l.tipo }}]</span>
+                            {{ l.messaggio }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
