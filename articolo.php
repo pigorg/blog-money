@@ -1,8 +1,8 @@
 <?php
-require_once dirname(__DIR__) . '/config.php';
-require_once dirname(__DIR__) . '/includes/helpers.php';
-require_once dirname(__DIR__) . '/includes/Database.php';
-require_once dirname(__DIR__) . '/includes/Template.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/Database.php';
+require_once __DIR__ . '/includes/Template.php';
 
 $database = new Database();
 $database->connect();
@@ -32,7 +32,6 @@ if (!$articolo) {
 }
 
 // Incrementa visite
-$db->prepare('UPDATE articoli SET visite = visite + 1 WHERE id = ?')->execute() || null;
 $vs = $db->prepare('UPDATE articoli SET visite = visite + 1 WHERE id = ?');
 $vs->bind_param('i', $articolo['id']);
 $vs->execute();
