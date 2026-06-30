@@ -75,6 +75,28 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'sincronizza_tutte') {
     rispondiJSON(['tipo' => 'success', 'messaggio' => "Sincronizzazione completata. $totale nuovi titoli.", 'nuovi' => $totale]);
 }
 
+// POST /api/bot.php { azione: 'suggerisci_titolo', titolo: '...', categoria: '...' }
+if ($metodo === 'POST' && ($body['azione'] ?? '') === 'suggerisci_titolo') {
+    $titolo    = trim($body['titolo'] ?? '');
+    $categoria = trim($body['categoria'] ?? 'Investimenti');
+
+    if (!$titolo) {
+        rispondiJSON(['tipo' => 'error', 'messaggio' => 'Il titolo è obbligatorio.'], 400);
+    }
+
+    $stmt = $db->prepare(
+        "INSERT INTO titoli_estratti (sorgente_id, titolo_originale, url_originale, categoria, stato)
+         VALUES (NULL, ?, '', ?, 'nuovo')"
+    );
+    $stmt->bind_param('ss', $titolo, $categoria);
+    if (!$stmt->execute()) {
+        rispondiJSON(['tipo' => 'error', 'messaggio' => 'Errore DB: ' . $stmt->error], 500);
+    }
+    $id = $db->insert_id;
+    logDB($db, 'manuale', "Articolo evergreen suggerito: $titolo [$categoria]");
+    rispondiJSON(['tipo' => 'success', 'messaggio' => "Titolo aggiunto alla coda (#$id). Clicca Genera per scrivere l'articolo.", 'id' => $id]);
+}
+
 // POST /api/bot.php { azione: 'pubblica_schedulati' }
 if ($metodo === 'POST' && ($body['azione'] ?? '') === 'pubblica_schedulati') {
     $generator = new ArticleGenerator($database, CLAUDE_API_KEY ?: 'placeholder', CLAUDE_MODEL);

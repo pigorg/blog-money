@@ -223,6 +223,38 @@
                     </div>
                 </transition>
 
+                <!-- Suggerisci articolo evergreen -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+                    <h3 class="font-semibold text-amber-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-bookmark text-amber-500"></i> Suggerisci Articolo Evergreen
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input v-model="suggerimento.titolo"
+                               placeholder="Es. Come investire in ETF nel 2025"
+                               class="border border-amber-200 rounded-lg px-3 py-2 text-sm sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <select v-model="suggerimento.categoria"
+                                class="border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option>Investimenti</option>
+                            <option>Risparmio</option>
+                            <option>ETF & Fondi</option>
+                            <option>Fiscalità</option>
+                            <option>Pensione & Previdenza</option>
+                            <option>Guide</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 mt-3">
+                        <button @click="suggerisciArticolo" :disabled="botOccupato || !suggerimento.titolo"
+                                class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-600 disabled:opacity-50 transition">
+                            <i class="fas fa-plus mr-1"></i> Aggiungi alla coda
+                        </button>
+                        <button @click="suggerisciEGenera" :disabled="botOccupato || !suggerimento.titolo"
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 transition">
+                            <i :class="botOccupato ? 'fas fa-spinner fa-spin' : 'fas fa-magic'" class="mr-1"></i>
+                            Aggiungi e genera subito
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Titoli in coda -->
                 <div class="mb-6">
                     <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">

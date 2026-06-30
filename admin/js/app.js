@@ -21,6 +21,7 @@ createApp({
             botOccupato: false,
             notifica: null,
             nuovaSorgente: { nome: '', url: '', tipo: 'rss' },
+            suggerimento: { titolo: '', categoria: 'Investimenti' },
         };
     },
 
@@ -175,8 +176,51 @@ createApp({
             }
         },
 
+        async suggerisciArticolo() {
+            if (!this.suggerimento.titolo.trim()) return;
+            try {
+                const r = await axios.post(`${API}/bot.php`, {
+                    azione: 'suggerisci_titolo',
+                    titolo: this.suggerimento.titolo,
+                    categoria: this.suggerimento.categoria,
+                });
+                this.mostraNotifica(r.data.tipo, r.data.messaggio);
+                this.suggerimento.titolo = '';
+                await this.caricaTitoliCoda();
+            } catch(e) {
+                this.mostraNotifica('error', e.response?.data?.messaggio || e.message);
+            }
+        },
+
+        async suggerisciEGenera() {
+            if (!this.suggerimento.titolo.trim()) return;
+            this.botOccupato = true;
+            this.notifica = null;
+            try {
+                // 1. Aggiungi alla coda
+                const r = await axios.post(`${API}/bot.php`, {
+                    azione: 'suggerisci_titolo',
+                    titolo: this.suggerimento.titolo,
+                    categoria: this.suggerimento.categoria,
+                });
+                const titoloId = r.data.id;
+                this.suggerimento.titolo = '';
+                await this.caricaTitoliCoda();
+                // 2. Genera subito
+                const r2 = await axios.post(`${API}/bot.php`, { azione: 'genera', titolo_id: titoloId });
+                this.mostraNotifica(r2.data.tipo, r2.data.messaggio);
+                await this.caricaArticoli();
+                await this.caricaTitoliCoda();
+                await this.caricaLog();
+            } catch(e) {
+                this.mostraNotifica('error', e.response?.data?.messaggio || e.message);
+            } finally {
+                this.botOccupato = false;
+            }
+        },
+
         apriArticolo(slug) {
-            window.open(`../articolo.php?slug=${slug}`, '_blank');
+            window.open(`../articolo/${slug}`, '_blank');
         },
 
         mostraNotifica(tipo, messaggio) {
