@@ -95,12 +95,13 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
             CURLOPT_TIMEOUT => 120,
         ]);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $response  = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
-        if (!$response) {
-            throw new Exception('cURL error: ' . curl_error($ch));
+        if ($response === false) {
+            throw new Exception('cURL error: ' . $curlError);
         }
 
         $data = json_decode($response, true);

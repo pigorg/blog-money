@@ -22,6 +22,7 @@ class ArticleGenerator {
             throw new Exception("Titolo ID $titolo_estratto_id non trovato.");
         }
 
+        set_time_limit(300);
         logDB($this->db, 'generazione', "Avvio generazione per: {$titolo['titolo_originale']}");
 
         // Fase 1: approfondimento
@@ -67,7 +68,7 @@ class ArticleGenerator {
         );
 
         $stmt->bind_param(
-            'isssssssssissss',
+            'issssssssissss',
             $titolo_estratto_id,
             $dati['titolo'],
             $slug,
@@ -83,7 +84,9 @@ class ArticleGenerator {
             $immaginePiccolaUrl,
             $immaginePiccolaAlt
         );
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            throw new Exception("INSERT articolo fallita: " . $stmt->error);
+        }
         $articolo_id = $this->db->insert_id;
 
         // Segna titolo come elaborato
