@@ -23,7 +23,7 @@ Fornisci SOLO un JSON valido con questa struttura:
   \"keywords_seo\": [\"keyword1\", \"keyword2\", \"keyword3\", \"keyword4\", \"keyword5\"]
 }";
 
-        $testo = $this->call($prompt, 1000);
+        $testo = $this->call($prompt, 600);
         $json = $this->estraiJSON($testo);
         return $json ?? ['contesto' => $testo, 'dati_chiave' => [], 'punti_principali' => [], 'implicazioni' => '', 'keywords_seo' => []];
     }
@@ -63,7 +63,7 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
   \"immagine_piccola_alt\": \"Descrizione immagine secondaria in italiano\"
 }";
 
-        $testo = $this->call($prompt, 4000);
+        $testo = $this->call($prompt, 3000);
         $json = $this->estraiJSON($testo);
 
         if (!$json || empty($json['contenuto'])) {

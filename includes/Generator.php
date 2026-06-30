@@ -22,18 +22,24 @@ class ArticleGenerator {
             throw new Exception("Titolo ID $titolo_estratto_id non trovato.");
         }
 
-        set_time_limit(300);
+        @set_time_limit(300);
+        @ini_set('max_execution_time', 300);
+
         logDB($this->db, 'generazione', "Avvio generazione per: {$titolo['titolo_originale']}");
 
         // Fase 1: approfondimento
+        logDB($this->db, 'generazione', '[1/3] Approfondimento in corso...', 'info');
         $approfondimento = $this->claude->approfondisci($titolo['titolo_originale']);
+        logDB($this->db, 'generazione', '[1/3] Approfondimento completato.', 'info');
 
         // Fase 2: generazione articolo
+        logDB($this->db, 'generazione', '[2/3] Scrittura articolo in corso...', 'info');
         $dati = $this->claude->generaArticolo(
             $titolo['titolo_originale'],
             $titolo['categoria'],
             $approfondimento
         );
+        logDB($this->db, 'generazione', '[2/3] Articolo scritto.', 'info');
 
         // Fase 3: generazione immagini AI
         $immagineGrandeUrl  = null;
@@ -51,10 +57,11 @@ class ArticleGenerator {
                 $immagineGrandeUrl  = $imageGen->genera($dati['immagine_grande_prompt'], 1280, 720);
                 $immaginePiccolaUrl = $imageGen->genera($dati['immagine_piccola_prompt'], 512, 512);
             } catch (Exception $e) {
-                logDB($this->db, 'generazione', 'Immagini non generate: ' . $e->getMessage(), 'warning');
+                logDB($this->db, 'generazione', '[3/3] Immagini non generate: ' . $e->getMessage(), 'warning');
             }
         }
 
+        logDB($this->db, 'generazione', '[DB] Salvataggio articolo...', 'info');
         // Genera slug unico
         $slug = $this->slugUnico($dati['titolo']);
 
