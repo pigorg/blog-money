@@ -7,22 +7,28 @@ $database = new Database();
 $database->connect();
 $db = $database->getConn();
 
-$evergreenCats = ['Investimenti', 'Risparmio', 'Pensione & Previdenza', 'Fiscalità', 'ETF & Fondi', 'Previdenza', 'Guide'];
+$evergreenCats  = ['Investimenti', 'Risparmio', 'Pensione & Previdenza', 'Fiscalità', 'ETF & Fondi', 'Previdenza', 'Guide'];
+$sezioneAttiva  = $_GET['sezione'] ?? '';
+$isEducational  = $sezioneAttiva === 'educational';
 
-// Ultime notizie (colonna sinistra): 9 articoli più recenti
-$notizie = $db->query(
-    "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url, immagine_alt
-     FROM articoli WHERE stato = 'pubblicato'
-     ORDER BY data_pubblicazione DESC LIMIT 9"
-)->fetch_all(MYSQLI_ASSOC);
-
-// Evergreen (colonna destra): categorie specifiche
 $placeholders = implode(',', array_fill(0, count($evergreenCats), '?'));
 $types        = str_repeat('s', count($evergreenCats));
-$stmtEvg      = $db->prepare(
+
+// Ultime notizie (colonna sinistra): 9 articoli più recenti NON evergreen
+$stmtNews = $db->prepare(
+    "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url, immagine_alt
+     FROM articoli WHERE stato = 'pubblicato' AND categoria NOT IN ($placeholders)
+     ORDER BY data_pubblicazione DESC LIMIT 9"
+);
+$stmtNews->bind_param($types, ...$evergreenCats);
+$stmtNews->execute();
+$notizie = $stmtNews->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Evergreen: categorie specifiche
+$stmtEvg = $db->prepare(
     "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url
      FROM articoli WHERE stato = 'pubblicato' AND categoria IN ($placeholders)
-     ORDER BY data_pubblicazione DESC LIMIT 8"
+     ORDER BY data_pubblicazione DESC LIMIT " . ($isEducational ? '24' : '8')
 );
 $stmtEvg->bind_param($types, ...$evergreenCats);
 $stmtEvg->execute();
@@ -70,7 +76,58 @@ $siteUrl = SITE_URL;
 
 <main class="max-w-7xl mx-auto px-4 py-8">
 
-<?php if (empty($notizie) && empty($evergreen)): ?>
+<?php if ($isEducational): ?>
+
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-8 sans">
+            <i class="fas fa-bookmark text-amber-500 text-lg"></i>
+            <h1 class="text-xl font-black uppercase tracking-widest text-gray-900">Guide & Approfondimenti</h1>
+            <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <?php if (empty($evergreen)): ?>
+        <div class="py-24 text-center">
+            <i class="fas fa-book-open text-6xl text-gray-100 mb-4"></i>
+            <p class="text-gray-400 sans">Le guide arriveranno presto.</p>
+        </div>
+        <?php else: ?>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php foreach ($evergreen as $a): ?>
+            <article class="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <a href="<?= urlArticolo($a['slug']) ?>" class="block">
+                    <div class="relative h-48 bg-amber-50">
+                        <?php if ($a['immagine_url']): ?>
+                        <img src="<?= htmlspecialchars($a['immagine_url']) ?>"
+                             alt="<?= htmlspecialchars($a['titolo_finale']) ?>"
+                             class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                             loading="lazy">
+                        <?php else: ?>
+                        <div class="w-full h-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-4xl text-amber-200"></i>
+                        </div>
+                        <?php endif; ?>
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wide sans">
+                                <?= htmlspecialchars($a['categoria']) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h2 class="font-bold text-gray-900 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">
+                            <?= htmlspecialchars($a['titolo_finale']) ?>
+                        </h2>
+                        <p class="sans text-xs text-gray-400 mt-2">
+                            <i class="fas fa-clock mr-1"></i><?= $a['tempo_lettura'] ?> min
+                        </p>
+                    </div>
+                </a>
+            </article>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+<?php elseif (empty($notizie) && empty($evergreen)): ?>
 <div class="py-36 text-center">
     <i class="fas fa-newspaper text-7xl text-gray-100 mb-6"></i>
     <h2 class="text-2xl font-bold text-gray-300 sans mb-2">Nessun articolo ancora</h2>

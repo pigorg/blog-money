@@ -4,11 +4,7 @@ $giorniIta = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì'
 $mesiIta   = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 $dataIta   = $giorniIta[(int)date('w')] . ' ' . date('d') . ' ' . $mesiIta[(int)date('n')] . ' ' . date('Y');
 
-$navCats = $db->query(
-    "SELECT DISTINCT categoria FROM articoli WHERE stato = 'pubblicato' ORDER BY categoria ASC"
-)->fetch_all(MYSQLI_ASSOC);
-
-$categoriaAttiva = $_GET['categoria'] ?? '';
+$sezioneAttiva = $_GET['sezione'] ?? '';
 ?>
 <!-- TOPBAR -->
 <div class="bg-slate-950 text-slate-500 text-xs sans py-1.5 hidden sm:block">
@@ -30,16 +26,14 @@ $categoriaAttiva = $_GET['categoria'] ?? '';
     </div>
     <nav class="max-w-7xl mx-auto px-4 sans">
         <div class="flex overflow-x-auto scrollbar-hide border-b border-slate-800">
-            <a href="/" class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 <?= !$categoriaAttiva ? 'text-blue-400 border-blue-400' : 'text-slate-400 hover:text-white border-transparent hover:border-slate-500' ?> transition-colors">
+            <a href="/" class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors
+               <?= $sezioneAttiva !== 'educational' ? 'text-blue-400 border-blue-400' : 'text-slate-400 hover:text-white border-transparent hover:border-slate-500' ?>">
                 Home
             </a>
-            <?php foreach ($navCats as $c): ?>
-            <a href="/?categoria=<?= urlencode($c['categoria']) ?>"
-               class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors
-               <?= $categoriaAttiva === $c['categoria'] ? 'text-blue-400 border-blue-400' : 'text-slate-400 hover:text-white border-transparent hover:border-slate-500' ?>">
-                <?= htmlspecialchars($c['categoria']) ?>
+            <a href="/?sezione=educational" class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors
+               <?= $sezioneAttiva === 'educational' ? 'text-amber-400 border-amber-400' : 'text-slate-400 hover:text-white border-transparent hover:border-slate-500' ?>">
+                Educational
             </a>
-            <?php endforeach; ?>
         </div>
     </nav>
 </header>
