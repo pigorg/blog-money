@@ -50,26 +50,40 @@ try {
     }
     cronLog("Totale nuovi titoli: $totaleNuovi");
 
-    // STEP 2: Genera articoli (quanti configurati)
-    $articoliAlGiorno = (int)($db->query("SELECT valore FROM configurazioni WHERE chiave = 'articoli_al_giorno'")->fetch_row()[0] ?? 1);
+    // STEP 2: Genera 1 notizia + 1 approfondimento evergreen al giorno
     $model = $db->query("SELECT valore FROM configurazioni WHERE chiave = 'claude_model'")->fetch_row()[0] ?? CLAUDE_MODEL;
-
-    cronLog("--- Generazione ($articoliAlGiorno articolo/i) ---");
     $generator = new ArticleGenerator($database, CLAUDE_API_KEY, $model);
 
+    $evergreenCats = ['Investimenti', 'Risparmio', 'Pensione & Previdenza', 'Fiscalità', 'ETF & Fondi', 'Previdenza', 'Guide'];
+    $placeholders  = implode(',', array_fill(0, count($evergreenCats), '"' . implode('","', $evergreenCats) . '"'));
+    // Costruzione sicura per IN clause (valori hardcoded, nessun input utente)
+    $evergreenIn = "'" . implode("','", array_map(fn($c) => $db->real_escape_string($c), $evergreenCats)) . "'";
+
+    $da_generare = [
+        'notizia'          => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria NOT IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1",
+        'approfondimento'  => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1",
+    ];
+
+    cronLog('--- Generazione (1 notizia + 1 approfondimento) ---');
     $generati = 0;
-    for ($i = 0; $i < $articoliAlGiorno; $i++) {
-        $row = $db->query("SELECT id FROM titoli_estratti WHERE stato = 'nuovo' ORDER BY data_estrazione ASC LIMIT 1")->fetch_assoc();
+
+    foreach ($da_generare as $tipo => $sql) {
+        $row = $db->query($sql)->fetch_assoc();
         if (!$row) {
-            cronLog("  Nessun titolo disponibile in coda.");
-            break;
+            // Fallback: prendi qualsiasi titolo disponibile
+            $row = $db->query("SELECT id FROM titoli_estratti WHERE stato = 'nuovo' ORDER BY data_estrazione ASC LIMIT 1")->fetch_assoc();
+            if (!$row) {
+                cronLog("  [$tipo] Nessun titolo disponibile in coda.");
+                continue;
+            }
+            cronLog("  [$tipo] Nessun titolo specifico, uso il primo disponibile.");
         }
         try {
             $articolo_id = $generator->generaArticolo($row['id']);
-            cronLog("  Articolo #$articolo_id generato con successo.");
+            cronLog("  [$tipo] Articolo #$articolo_id generato con successo.");
             $generati++;
         } catch (Exception $e) {
-            cronLog('  ERRORE generazione: ' . $e->getMessage());
+            cronLog("  [$tipo] ERRORE: " . $e->getMessage());
         }
     }
 
