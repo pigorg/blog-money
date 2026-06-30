@@ -112,8 +112,9 @@ $siteUrl = SITE_URL;
                          alt="<?= htmlspecialchars($featured['immagine_alt'] ?? $featured['titolo_finale']) ?>"
                          class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700">
                     <?php else: ?>
-                    <div class="w-full h-full bg-gradient-to-br from-slate-800 via-blue-900 to-slate-900 flex items-center justify-center">
-                        <i class="fas fa-chart-line text-7xl text-blue-400/20"></i>
+                    <div class="w-full h-full bg-gradient-to-br from-slate-700 via-blue-900 to-slate-900 flex flex-col items-center justify-center gap-3">
+                        <i class="fas fa-chart-line text-6xl text-blue-400/30"></i>
+                        <span class="sans text-blue-300/50 text-sm uppercase tracking-widest"><?= htmlspecialchars($featured['categoria']) ?></span>
                     </div>
                     <?php endif; ?>
                     <div class="hero-gradient absolute inset-0"></div>
@@ -147,8 +148,8 @@ $siteUrl = SITE_URL;
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                              loading="lazy">
                         <?php else: ?>
-                        <div class="w-full h-full flex items-center justify-center">
-                            <i class="fas fa-chart-bar text-gray-200"></i>
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50">
+                            <i class="fas fa-chart-bar text-2xl text-blue-200"></i>
                         </div>
                         <?php endif; ?>
                     </div>
