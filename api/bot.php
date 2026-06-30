@@ -84,11 +84,20 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'suggerisci_titolo') {
         rispondiJSON(['tipo' => 'error', 'messaggio' => 'Il titolo è obbligatorio.'], 400);
     }
 
+    // Trova o crea sorgente "Manuale" per articoli suggeriti dall'admin
+    $sorgenteRow = $db->query("SELECT id FROM sorgenti WHERE nome = 'Manuale' LIMIT 1")->fetch_assoc();
+    if ($sorgenteRow) {
+        $sorgenteId = (int)$sorgenteRow['id'];
+    } else {
+        $db->query("INSERT INTO sorgenti (nome, url, tipo, attiva) VALUES ('Manuale', '', 'manuale', 0)");
+        $sorgenteId = (int)$db->insert_id;
+    }
+
     $stmt = $db->prepare(
         "INSERT INTO titoli_estratti (sorgente_id, titolo_originale, url_originale, categoria, stato)
-         VALUES (NULL, ?, '', ?, 'nuovo')"
+         VALUES (?, ?, '', ?, 'nuovo')"
     );
-    $stmt->bind_param('ss', $titolo, $categoria);
+    $stmt->bind_param('iss', $sorgenteId, $titolo, $categoria);
     if (!$stmt->execute()) {
         rispondiJSON(['tipo' => 'error', 'messaggio' => 'Errore DB: ' . $stmt->error], 500);
     }
