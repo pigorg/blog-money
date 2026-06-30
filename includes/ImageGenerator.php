@@ -17,7 +17,7 @@ class ImageGenerator {
 
     public function genera($prompt, $larghezza = 1280, $altezza = 720) {
         $payload = json_encode([
-            'model'  => 'black-forest-labs/FLUX.1-schnell-Free',
+            'model'  => 'black-forest-labs/FLUX.1-schnell',
             'prompt' => $prompt,
             'width'  => $larghezza,
             'height' => $altezza,
