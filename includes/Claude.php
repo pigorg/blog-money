@@ -63,11 +63,12 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
   \"immagine_piccola_alt\": \"Descrizione immagine secondaria in italiano\"
 }";
 
-        $testo = $this->call($prompt, 3000);
+        $testo = $this->call($prompt, 4000);
         $json = $this->estraiJSON($testo);
 
         if (!$json || empty($json['contenuto'])) {
-            throw new Exception('Claude non ha restituito un articolo valido.');
+            $preview = substr($testo, 0, 300);
+            throw new Exception('Claude non ha restituito JSON valido. Risposta: ' . $preview);
         }
 
         return $json;

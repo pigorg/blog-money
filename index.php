@@ -40,6 +40,11 @@ $stmtEvg->bind_param($types, ...$evergreenCats);
 $stmtEvg->execute();
 $evergreen = $stmtEvg->get_result()->fetch_all(MYSQLI_ASSOC);
 
+// Data in italiano
+$giorniIta = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+$mesiIta   = ['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+$dataIta   = $giorniIta[(int)date('w')] . ' ' . date('d') . ' ' . $mesiIta[(int)date('n')] . ' ' . date('Y');
+
 // Navigazione categorie
 $cats = $db->query(
     "SELECT DISTINCT categoria FROM articoli WHERE stato = 'pubblicato' ORDER BY categoria ASC"
@@ -96,9 +101,8 @@ $siteUrl = SITE_URL;
 
 <!-- TOPBAR -->
 <div class="bg-slate-950 text-slate-400 text-xs sans py-1.5 hidden sm:block">
-    <div class="max-w-7xl mx-auto px-4 flex justify-between">
-        <span class="uppercase tracking-widest"><?= strftime('%A %d %B %Y') ?? date('d F Y') ?></span>
-        <span>Contenuti generati con AI · Solo a scopo informativo</span>
+    <div class="max-w-7xl mx-auto px-4">
+        <span class="uppercase tracking-widest"><?= $dataIta ?></span>
     </div>
 </div>
 
