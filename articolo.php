@@ -48,17 +48,17 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($articolo['titolo_finale']) ?> - Blog Money</title>
+    <title><?= htmlspecialchars($articolo['titolo_finale']) ?> | Blog Money</title>
     <meta name="description" content="<?= htmlspecialchars($articolo['meta_description'] ?? $articolo['excerpt'] ?? '') ?>">
     <?php if ($articolo['keywords']): ?>
     <meta name="keywords" content="<?= htmlspecialchars($articolo['keywords']) ?>">
     <?php endif; ?>
-    <link rel="canonical" href="<?= SITE_URL ?>/articolo.php?slug=<?= urlencode($articolo['slug']) ?>">
+    <link rel="canonical" href="<?= SITE_URL ?>/articolo/<?= $articolo['slug'] ?>">
 
     <meta property="og:title" content="<?= htmlspecialchars($articolo['titolo_finale']) ?>">
     <meta property="og:description" content="<?= htmlspecialchars($articolo['excerpt'] ?? '') ?>">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="<?= SITE_URL ?>/articolo.php?slug=<?= urlencode($articolo['slug']) ?>">
+    <meta property="og:url" content="<?= SITE_URL ?>/articolo/<?= $articolo['slug'] ?>">
     <meta property="og:site_name" content="Blog Money">
     <meta property="article:published_time" content="<?= $dataISO ?>">
     <meta property="article:section" content="<?= htmlspecialchars($articolo['categoria']) ?>">
@@ -88,7 +88,7 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
         'dateModified'    => $dataISO,
         'author'          => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
         'publisher'       => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
-        'mainEntityOfPage'=> ['@type' => 'WebPage', '@id' => SITE_URL . '/articolo.php?slug=' . urlencode($articolo['slug'])],
+        'mainEntityOfPage'=> ['@type' => 'WebPage', '@id' => SITE_URL . '/articolo/' . $articolo['slug']],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
     </script>
     <script type="application/ld+json">
@@ -98,7 +98,7 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',                    'item' => SITE_URL . '/'],
             ['@type' => 'ListItem', 'position' => 2, 'name' => $articolo['categoria'],    'item' => SITE_URL . '/?categoria=' . urlencode($articolo['categoria'])],
-            ['@type' => 'ListItem', 'position' => 3, 'name' => $articolo['titolo_finale']],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $articolo['titolo_finale'], 'item' => SITE_URL . '/articolo/' . $articolo['slug']],
         ],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
     </script>

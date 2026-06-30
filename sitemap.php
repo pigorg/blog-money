@@ -38,7 +38,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 
   <?php foreach ($articoli as $a): ?>
   <url>
-    <loc><?= SITE_URL ?>/articolo.php?slug=<?= urlencode($a['slug']) ?></loc>
+    <loc><?= SITE_URL ?>/articolo/<?= $a['slug'] ?></loc>
     <lastmod><?= date('Y-m-d', strtotime($a['data_pubblicazione'])) ?></lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

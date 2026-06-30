@@ -35,11 +35,11 @@ $siteUrl = SITE_URL;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Money — Finanza, Investimenti e Mercati</title>
-    <meta name="description" content="Notizie finanziarie, guide agli investimenti e analisi di mercato aggiornate ogni giorno con intelligenza artificiale.">
+    <title>Blog Money | Notizie di Finanza, Investimenti e Mercati Finanziari</title>
+    <meta name="description" content="Scopri articoli approfonditi su investimenti, risparmio, ETF, criptovalute e mercati finanziari. Guide pratiche e notizie aggiornate ogni giorno per risparmiatori italiani.">
     <link rel="canonical" href="<?= $siteUrl ?>/">
-    <meta property="og:title" content="Blog Money — Finanza, Investimenti e Mercati">
-    <meta property="og:description" content="Notizie finanziarie e guide agli investimenti aggiornate ogni giorno.">
+    <meta property="og:title" content="Blog Money | Finanza, Investimenti e Mercati per Risparmiatori Italiani">
+    <meta property="og:description" content="Articoli su investimenti, risparmio, ETF, criptovalute e mercati finanziari aggiornati ogni giorno.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= $siteUrl ?>/">
     <meta name="twitter:card" content="summary_large_image">
@@ -105,7 +105,7 @@ $siteUrl = SITE_URL;
 
         <!-- Articolo in evidenza -->
         <article class="group mb-6">
-            <a href="articolo.php?slug=<?= urlencode($featured['slug']) ?>" class="block">
+            <a href="<?= urlArticolo($featured['slug']) ?>" class="block">
                 <div class="relative rounded-2xl overflow-hidden" style="height:320px;">
                     <?php if ($featured['immagine_url']): ?>
                     <img src="<?= htmlspecialchars($featured['immagine_url']) ?>"
@@ -139,7 +139,7 @@ $siteUrl = SITE_URL;
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <?php foreach ($rest as $a): ?>
             <article class="group flex gap-3 border-b border-gray-100 pb-5">
-                <a href="articolo.php?slug=<?= urlencode($a['slug']) ?>" class="flex gap-3 w-full">
+                <a href="<?= urlArticolo($a['slug']) ?>" class="flex gap-3 w-full">
                     <div class="flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden bg-gray-100">
                         <?php if ($a['immagine_url']): ?>
                         <img src="<?= htmlspecialchars($a['immagine_url']) ?>"
@@ -198,7 +198,7 @@ $siteUrl = SITE_URL;
         <div class="space-y-0">
             <?php foreach ($evergreen as $i => $a): ?>
             <article class="group <?= $i > 0 ? 'border-t border-gray-100' : '' ?> py-4">
-                <a href="articolo.php?slug=<?= urlencode($a['slug']) ?>" class="flex gap-3">
+                <a href="<?= urlArticolo($a['slug']) ?>" class="flex gap-3">
                     <div class="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-amber-50 flex items-center justify-center">
                         <?php if ($a['immagine_url']): ?>
                         <img src="<?= htmlspecialchars($a['immagine_url']) ?>"

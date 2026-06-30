@@ -15,6 +15,9 @@ Options -Indexes
     RewriteRule ^includes/ - [F,L]
     RewriteRule ^cron/ - [F,L]
 
+    # URL puliti articoli: /articolo/slug → articolo.php?slug=slug
+    RewriteRule ^articolo/([a-z0-9\-]+)/?$ articolo.php?slug=$1 [QSA,L]
+
     # Sitemap XML → PHP dinamico
     RewriteRule ^sitemap\.xml$ sitemap.php [L]
 

@@ -27,6 +27,10 @@ function rispondiJSON($data, $status = 200) {
     exit;
 }
 
+function urlArticolo($slug) {
+    return '/articolo/' . $slug;
+}
+
 function logDB($db, $tipo, $messaggio, $status = 'success', $articolo_id = null) {
     $stmt = $db->prepare(
         'INSERT INTO log_elaborazioni (tipo, articolo_id, messaggio, status) VALUES (?, ?, ?, ?)'
