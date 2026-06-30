@@ -32,14 +32,14 @@ class ArticleGenerator {
         $approfondimento = $this->claude->approfondisci($titolo['titolo_originale']);
         logDB($this->db, 'generazione', '[1/3] Approfondimento completato.', 'info');
 
-        // Fase 2: generazione articolo
-        logDB($this->db, 'generazione', '[2/3] Scrittura articolo in corso...', 'info');
+        // Fase 2: metadati + contenuto HTML (2 chiamate Claude separate)
+        logDB($this->db, 'generazione', '[2/3] Generazione metadati e contenuto...', 'info');
         $dati = $this->claude->generaArticolo(
             $titolo['titolo_originale'],
             $titolo['categoria'],
             $approfondimento
         );
-        logDB($this->db, 'generazione', '[2/3] Articolo scritto.', 'info');
+        logDB($this->db, 'generazione', '[2/3] Contenuto generato (' . strlen($dati['contenuto']) . ' char).', 'info');
 
         // Fase 3: generazione immagini AI
         $immagineGrandeUrl  = null;

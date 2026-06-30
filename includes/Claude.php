@@ -6,7 +6,7 @@ class Claude {
 
     public function __construct($apiKey, $model = 'claude-sonnet-4-6') {
         $this->apiKey = $apiKey;
-        $this->model = $model;
+        $this->model  = $model;
     }
 
     public function approfondisci($titolo) {
@@ -14,73 +14,101 @@ class Claude {
 
 Rispondi SEMPRE in italiano, anche se il titolo è in inglese.
 
-Fornisci SOLO un JSON valido con questa struttura:
+Fornisci SOLO un JSON valido con questa struttura (nessun testo prima o dopo):
 {
-  \"contesto\": \"Spiegazione del contesto e background (2-3 paragrafi)\",
+  \"contesto\": \"spiegazione del contesto (2-3 paragrafi)\",
   \"dati_chiave\": [\"dato 1\", \"dato 2\", \"dato 3\"],
   \"punti_principali\": [\"punto 1\", \"punto 2\", \"punto 3\"],
-  \"implicazioni\": \"Cosa significa per gli investitori italiani\",
+  \"implicazioni\": \"cosa significa per gli investitori italiani\",
   \"keywords_seo\": [\"keyword1\", \"keyword2\", \"keyword3\", \"keyword4\", \"keyword5\"]
 }";
 
         $testo = $this->call($prompt, 600);
-        $json = $this->estraiJSON($testo);
-        return $json ?? ['contesto' => $testo, 'dati_chiave' => [], 'punti_principali' => [], 'implicazioni' => '', 'keywords_seo' => []];
+        $json  = $this->estraiJSON($testo);
+        return $json ?? [
+            'contesto'          => $testo,
+            'dati_chiave'       => [],
+            'punti_principali'  => [],
+            'implicazioni'      => '',
+            'keywords_seo'      => [],
+        ];
     }
 
     public function generaArticolo($titolo, $categoria, $approfondimento) {
         $contesto = json_encode($approfondimento, JSON_UNESCAPED_UNICODE);
 
-        $prompt = "Sei un giornalista finanziario esperto. Scrivi un articolo di blog professionale in italiano.
+        // Step A: metadati (JSON leggero, senza HTML)
+        $promptMeta = "Sei un giornalista finanziario. Devi preparare i metadati per un articolo in italiano.
 
 ARGOMENTO: $titolo
 CATEGORIA: $categoria
-CONTESTO E DATI: $contesto
+CONTESTO: $contesto
 
-ISTRUZIONI:
-- Lunghezza: 1500-2000 parole
-- Formato: HTML con tag h2, h3, p, ul, li, strong
-- Tono: informativo, chiaro, autorevole ma accessibile
-- Struttura: introduzione coinvolgente → sviluppo con dati → conclusione con call to action
-- Integra naturalmente le keywords SEO
-- NON usare markdown, solo HTML puro
-
-Per le immagini crea prompt in inglese adatti a un modello text-to-image (FLUX):
-- immagine_grande_prompt: scena finanziaria fotorealistica, orizzontale 16:9, cinematic lighting
-- immagine_piccola_prompt: dettaglio o elemento correlato all'articolo, quadrata, close-up
-
-Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
+Rispondi SOLO con questo JSON (nessun testo prima o dopo, usa SOLO virgolette doppie, non usare virgolette all'interno dei valori):
 {
-  \"titolo\": \"Titolo SEO ottimizzato (max 70 caratteri)\",
-  \"excerpt\": \"Introduzione breve e coinvolgente (max 160 caratteri)\",
-  \"meta_description\": \"Meta description SEO (max 160 caratteri)\",
+  \"titolo\": \"Titolo SEO ottimizzato max 70 caratteri\",
+  \"excerpt\": \"Introduzione coinvolgente max 160 caratteri\",
+  \"meta_description\": \"Meta description SEO max 160 caratteri\",
   \"keywords\": \"keyword1, keyword2, keyword3, keyword4, keyword5\",
-  \"contenuto\": \"<h2>...</h2><p>...</p> (HTML completo articolo 1500+ parole)\",
   \"tempo_lettura\": 7,
-  \"immagine_grande_prompt\": \"photorealistic financial scene, ..., cinematic lighting, 16:9\",
-  \"immagine_piccola_prompt\": \"close-up of ..., square format, sharp focus\",
+  \"immagine_grande_prompt\": \"photorealistic financial scene cinematic lighting 16:9\",
+  \"immagine_piccola_prompt\": \"close-up financial detail square format sharp focus\",
   \"immagine_alt\": \"Descrizione immagine principale in italiano\",
   \"immagine_piccola_alt\": \"Descrizione immagine secondaria in italiano\"
 }";
 
-        $testo = $this->call($prompt, 4000);
-        $json = $this->estraiJSON($testo);
+        $testoMeta = $this->call($promptMeta, 600);
+        $meta      = $this->estraiJSON($testoMeta);
 
-        if (!$json || empty($json['contenuto'])) {
-            $preview = substr($testo, 0, 300);
-            throw new Exception('Claude non ha restituito JSON valido. Risposta: ' . $preview);
+        if (!$meta || empty($meta['titolo'])) {
+            $this->debugLog('META', $testoMeta);
+            throw new Exception('Claude non ha restituito metadati validi. json_error: ' . json_last_error_msg());
         }
 
-        return $json;
+        // Step B: contenuto HTML come testo puro (non in JSON)
+        $promptContent = "Sei un giornalista finanziario esperto. Scrivi un articolo di blog professionale in italiano.
+
+TITOLO: {$meta['titolo']}
+CATEGORIA: $categoria
+CONTESTO E DATI: $contesto
+
+ISTRUZIONI:
+- Lunghezza: 900-1200 parole
+- Formato: HTML con tag h2, h3, p, ul, li, strong
+- Tono: informativo, chiaro, autorevole ma accessibile
+- Struttura: introduzione coinvolgente → sviluppo con dati → conclusione con call to action
+- NON usare markdown, solo HTML puro
+- NON scrivere nulla prima del primo tag HTML e nulla dopo l'ultimo tag HTML
+
+Scrivi SOLO il corpo dell'articolo in HTML (inizia direttamente con <h2> o <p>):";
+
+        $contenuto = trim($this->call($promptContent, 3000));
+
+        if (empty($contenuto) || strlen($contenuto) < 200) {
+            $this->debugLog('CONTENUTO', $contenuto);
+            throw new Exception('Claude non ha generato contenuto sufficiente (' . strlen($contenuto) . ' caratteri).');
+        }
+
+        return array_merge($meta, ['contenuto' => $contenuto]);
+    }
+
+    private function debugLog($tipo, $testo) {
+        $file = dirname(__DIR__) . '/cron/claude_debug.log';
+        $riga = "=== $tipo @ " . date('Y-m-d H:i:s') . " ===\n"
+              . "json_error: " . json_last_error_msg() . "\n"
+              . "lunghezza: " . strlen($testo) . " char\n"
+              . "--- RISPOSTA ---\n"
+              . $testo . "\n\n";
+        file_put_contents($file, $riga, FILE_APPEND);
     }
 
     private function call($prompt, $maxTokens = 2000) {
         $payload = json_encode([
-            'model' => $this->model,
+            'model'      => $this->model,
             'max_tokens' => $maxTokens,
-            'messages' => [
+            'messages'   => [
                 ['role' => 'user', 'content' => $prompt]
-            ]
+            ],
         ]);
 
         $ch = curl_init($this->apiUrl);
@@ -90,10 +118,10 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
                 'x-api-key: ' . $this->apiKey,
                 'anthropic-version: 2023-06-01',
             ],
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 120,
+            CURLOPT_TIMEOUT        => 120,
         ]);
 
         $response  = curl_exec($ch);
@@ -116,21 +144,24 @@ Rispondi SOLO con questo JSON valido (niente testo prima o dopo):
     }
 
     private function estraiJSON($testo) {
-        // Cerca JSON tra ``` o direttamente
-        if (preg_match('/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i', $testo, $m)) {
-            return json_decode($m[1], true);
-        }
-        // Prova parsing diretto
+        // 1. Parse diretto
         $parsed = json_decode($testo, true);
-        if ($parsed) {
-            return $parsed;
-        }
-        // Cerca prima { e ultima }
+        if ($parsed !== null) return $parsed;
+
+        // 2. Rimuovi code fences e riprova
+        $pulito = preg_replace('/^```(?:json)?\s*/i', '', trim($testo));
+        $pulito = preg_replace('/\s*```$/i', '', $pulito);
+        $parsed = json_decode(trim($pulito), true);
+        if ($parsed !== null) return $parsed;
+
+        // 3. Estrai dal primo { all'ultima }
         $start = strpos($testo, '{');
-        $end = strrpos($testo, '}');
-        if ($start !== false && $end !== false) {
-            return json_decode(substr($testo, $start, $end - $start + 1), true);
+        $end   = strrpos($testo, '}');
+        if ($start !== false && $end !== false && $end > $start) {
+            $parsed = json_decode(substr($testo, $start, $end - $start + 1), true);
+            if ($parsed !== null) return $parsed;
         }
+
         return null;
     }
 }
