@@ -4,7 +4,7 @@
             <div class="text-center md:text-left">
                 <div class="flex items-center gap-2 justify-center md:justify-start">
                     <i class="fas fa-chart-line text-blue-400 text-xl"></i>
-                    <span class="text-white text-xl font-black uppercase tracking-tighter">Blog Money</span>
+                    <span class="text-white text-xl font-black uppercase tracking-tighter">Finanza Facile</span>
                 </div>
                 <p class="text-slate-600 text-xs mt-1 tracking-widest uppercase">Finanza · Investimenti · Mercati</p>
             </div>
@@ -23,7 +23,8 @@
         <div class="text-xs text-slate-500 leading-relaxed max-w-3xl mx-auto text-center space-y-2">
             <p>Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. Non può pertanto considerarsi un prodotto editoriale ai sensi della legge n.62 del 2001.</p>
             <p>Gli autori, inoltre, non hanno alcuna responsabilità per quanto riguarda i siti ai quali è possibile accedere tramite eventuali collegamenti, posti all'interno del sito stesso, forniti come semplice servizio a coloro che visitano il sito.</p>
-            <p class="text-slate-600 pt-2">&copy; <?= date('Y') ?> Blog Money</p>
+            <p>Gli autori non si assumono alcuna responsabilità in merito alla verifica e alla correttezza dei contenuti pubblicati. Le informazioni presenti nel sito hanno scopo puramente informativo e non costituiscono in alcun modo consulenza finanziaria, legale o professionale.</p>
+            <p class="text-slate-600 pt-2">&copy; <?= date('Y') ?> Finanza Facile</p>
         </div>
     </div>
 </footer>

@@ -20,6 +20,7 @@ require_once BASE_DIR . '/includes/helpers.php';
 require_once BASE_DIR . '/includes/Database.php';
 require_once BASE_DIR . '/includes/Scraper.php';
 require_once BASE_DIR . '/includes/Generator.php';
+require_once BASE_DIR . '/includes/SocialSharer.php';
 
 if (!CLAUDE_API_KEY) {
     cronLog('ERRORE: CLAUDE_API_KEY non configurata in config.php');
@@ -59,12 +60,14 @@ try {
     // Costruzione sicura per IN clause (valori hardcoded, nessun input utente)
     $evergreenIn = "'" . implode("','", array_map(fn($c) => $db->real_escape_string($c), $evergreenCats)) . "'";
 
+    // Ratio 2:1 — 2 notizie per ogni 1 evergreen
     $da_generare = [
-        'notizia'          => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria NOT IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1",
+        'notizia_1'        => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria NOT IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1",
+        'notizia_2'        => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria NOT IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1 OFFSET 1",
         'approfondimento'  => "SELECT id FROM titoli_estratti WHERE stato = 'nuovo' AND categoria IN ($evergreenIn) ORDER BY data_estrazione ASC LIMIT 1",
     ];
 
-    cronLog('--- Generazione (1 notizia + 1 approfondimento) ---');
+    cronLog('--- Generazione (2 notizie + 1 approfondimento) ---');
     $generati = 0;
 
     foreach ($da_generare as $tipo => $sql) {
@@ -90,9 +93,25 @@ try {
     // STEP 3: Pubblica schedulati
     cronLog('--- Pubblicazione schedulati ---');
     $pubblicati = $generator->pubblicaSchedulati();
-    cronLog("  Articoli pubblicati: $pubblicati");
+    cronLog("  Articoli pubblicati: " . count($pubblicati));
 
-    cronLog("=== CRON COMPLETATO (generati: $generati, pubblicati: $pubblicati) ===");
+    // STEP 4: Condividi sui social
+    if (!empty($pubblicati)) {
+        cronLog('--- Condivisione social ---');
+        $sharer = new SocialSharer($db);
+        foreach ($pubblicati as $art) {
+            $risultati = $sharer->condividi($art);
+            foreach ($risultati as $social => $esito) {
+                if ($esito === true) {
+                    cronLog("  [$social] ✓ Pubblicato: {$art['titolo_finale']}");
+                } else {
+                    cronLog("  [$social] ERRORE: $esito");
+                }
+            }
+        }
+    }
+
+    cronLog("=== CRON COMPLETATO (generati: $generati, pubblicati: " . count($pubblicati) . ") ===");
     cronLog('');
 
 } catch (Exception $e) {

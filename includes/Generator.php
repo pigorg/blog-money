@@ -17,6 +17,7 @@ class ArticleGenerator {
         $stmt->bind_param('i', $titolo_estratto_id);
         $stmt->execute();
         $titolo = $stmt->get_result()->fetch_assoc();
+        $titolo['note'] = $titolo['note'] ?? '';
 
         if (!$titolo) {
             throw new Exception("Titolo ID $titolo_estratto_id non trovato.");
@@ -37,7 +38,8 @@ class ArticleGenerator {
         $dati = $this->claude->generaArticolo(
             $titolo['titolo_originale'],
             $titolo['categoria'],
-            $approfondimento
+            $approfondimento,
+            $titolo['note']
         );
         logDB($this->db, 'generazione', '[2/3] Contenuto generato (' . strlen($dati['contenuto']) . ' char).', 'info');
 
@@ -140,11 +142,11 @@ class ArticleGenerator {
         $stmt->execute();
     }
 
-    public function pubblicaSchedulati() {
+    public function pubblicaSchedulati(): array {
         $result = $this->db->query(
-            "SELECT id FROM articoli WHERE stato = 'schedulato' AND data_scheduling <= NOW()"
+            "SELECT id, titolo_finale, slug, excerpt FROM articoli WHERE stato = 'schedulato' AND data_scheduling <= NOW()"
         );
-        $pubblicati = 0;
+        $pubblicati = [];
         while ($row = $result->fetch_assoc()) {
             $stmt = $this->db->prepare(
                 "UPDATE articoli SET stato = 'pubblicato', data_pubblicazione = NOW() WHERE id = ?"
@@ -152,7 +154,7 @@ class ArticleGenerator {
             $stmt->bind_param('i', $row['id']);
             $stmt->execute();
             logDB($this->db, 'pubblicazione', "Articolo #{$row['id']} pubblicato", 'success', $row['id']);
-            $pubblicati++;
+            $pubblicati[] = $row;
         }
         return $pubblicati;
     }

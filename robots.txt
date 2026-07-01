@@ -6,4 +6,4 @@ Disallow: /includes/
 Disallow: /cron/
 Disallow: /uploads/immagini/
 
-Sitemap: https://tuosito.com/sitemap.php
+Sitemap: https://tuosito.com/sitemap.xml

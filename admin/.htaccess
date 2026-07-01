@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Area riservata"
+AuthUserFile /home2/istorela/public_html/admin/.htpasswd
+Require valid-user

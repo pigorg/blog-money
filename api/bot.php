@@ -75,10 +75,11 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'sincronizza_tutte') {
     rispondiJSON(['tipo' => 'success', 'messaggio' => "Sincronizzazione completata. $totale nuovi titoli.", 'nuovi' => $totale]);
 }
 
-// POST /api/bot.php { azione: 'suggerisci_titolo', titolo: '...', categoria: '...' }
+// POST /api/bot.php { azione: 'suggerisci_titolo', titolo: '...', categoria: '...', note: '...' }
 if ($metodo === 'POST' && ($body['azione'] ?? '') === 'suggerisci_titolo') {
     $titolo    = trim($body['titolo'] ?? '');
     $categoria = trim($body['categoria'] ?? 'Investimenti');
+    $note      = trim($body['note'] ?? '');
 
     if (!$titolo) {
         rispondiJSON(['tipo' => 'error', 'messaggio' => 'Il titolo è obbligatorio.'], 400);
@@ -94,10 +95,10 @@ if ($metodo === 'POST' && ($body['azione'] ?? '') === 'suggerisci_titolo') {
     }
 
     $stmt = $db->prepare(
-        "INSERT INTO titoli_estratti (sorgente_id, titolo_originale, url_originale, categoria, stato)
-         VALUES (?, ?, '', ?, 'nuovo')"
+        "INSERT INTO titoli_estratti (sorgente_id, titolo_originale, url_originale, categoria, note, stato)
+         VALUES (?, ?, '', ?, ?, 'nuovo')"
     );
-    $stmt->bind_param('iss', $sorgenteId, $titolo, $categoria);
+    $stmt->bind_param('isss', $sorgenteId, $titolo, $categoria, $note);
     if (!$stmt->execute()) {
         rispondiJSON(['tipo' => 'error', 'messaggio' => 'Errore DB: ' . $stmt->error], 500);
     }

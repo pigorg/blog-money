@@ -22,6 +22,7 @@ CREATE TABLE titoli_estratti (
   titolo_originale VARCHAR(255) NOT NULL,
   url_originale VARCHAR(500),
   categoria VARCHAR(100),
+  note TEXT NULL,
   stato ENUM('nuovo','elaborato','scartato') DEFAULT 'nuovo',
   data_estrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (sorgente_id) REFERENCES sorgenti(id) ON DELETE CASCADE,
@@ -155,3 +156,6 @@ INSERT INTO template (nome, html, css, attivo) VALUES ('default', '<article>{{co
 -- ALTER TABLE articoli
 --   ADD COLUMN immagine_piccola_url VARCHAR(500) AFTER immagine_alt,
 --   ADD COLUMN immagine_piccola_alt VARCHAR(255) AFTER immagine_piccola_url;
+
+-- Migrazione: aggiunge colonna note a titoli_estratti
+-- ALTER TABLE titoli_estratti ADD COLUMN note TEXT NULL AFTER categoria;

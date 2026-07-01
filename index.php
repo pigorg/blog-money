@@ -9,18 +9,28 @@ $db = $database->getConn();
 
 $evergreenCats  = ['Investimenti', 'Risparmio', 'Pensione & Previdenza', 'Fiscalità', 'ETF & Fondi', 'Previdenza', 'Guide'];
 $sezioneAttiva  = $_GET['sezione'] ?? '';
+$categoriaAttiva = $_GET['categoria'] ?? '';
 $isEducational  = $sezioneAttiva === 'educational';
 
 $placeholders = implode(',', array_fill(0, count($evergreenCats), '?'));
 $types        = str_repeat('s', count($evergreenCats));
 
-// Ultime notizie (colonna sinistra): 9 articoli più recenti NON evergreen
-$stmtNews = $db->prepare(
-    "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url, immagine_alt
-     FROM articoli WHERE stato = 'pubblicato' AND categoria NOT IN ($placeholders)
-     ORDER BY data_pubblicazione DESC LIMIT 9"
-);
-$stmtNews->bind_param($types, ...$evergreenCats);
+// Ultime notizie (colonna sinistra): 9 articoli più recenti NON evergreen, filtrabile per categoria
+if ($categoriaAttiva !== '') {
+    $stmtNews = $db->prepare(
+        "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url, immagine_alt
+         FROM articoli WHERE stato = 'pubblicato' AND categoria = ?
+         ORDER BY data_pubblicazione DESC LIMIT 9"
+    );
+    $stmtNews->bind_param('s', $categoriaAttiva);
+} else {
+    $stmtNews = $db->prepare(
+        "SELECT id, titolo_finale, slug, excerpt, categoria, data_pubblicazione, tempo_lettura, immagine_url, immagine_alt
+         FROM articoli WHERE stato = 'pubblicato' AND categoria NOT IN ($placeholders)
+         ORDER BY data_pubblicazione DESC LIMIT 9"
+    );
+    $stmtNews->bind_param($types, ...$evergreenCats);
+}
 $stmtNews->execute();
 $notizie = $stmtNews->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -41,10 +51,10 @@ $siteUrl = SITE_URL;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Money | Notizie di Finanza, Investimenti e Mercati Finanziari</title>
+    <title>Finanza Facile | Notizie di Finanza, Investimenti e Mercati Finanziari</title>
     <meta name="description" content="Scopri articoli approfonditi su investimenti, risparmio, ETF, criptovalute e mercati finanziari. Guide pratiche e notizie aggiornate ogni giorno per risparmiatori italiani.">
     <link rel="canonical" href="<?= $siteUrl ?>/">
-    <meta property="og:title" content="Blog Money | Finanza, Investimenti e Mercati per Risparmiatori Italiani">
+    <meta property="og:title" content="Finanza Facile | Finanza, Investimenti e Mercati per Risparmiatori Italiani">
     <meta property="og:description" content="Articoli su investimenti, risparmio, ETF, criptovalute e mercati finanziari aggiornati ogni giorno.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= $siteUrl ?>/">
@@ -54,7 +64,7 @@ $siteUrl = SITE_URL;
     <meta name="twitter:image" content="<?= htmlspecialchars($notizie[0]['immagine_url']) ?>">
     <?php endif; ?>
     <script type="application/ld+json">
-    <?= json_encode(['@context'=>'https://schema.org','@type'=>'WebSite','name'=>'Blog Money','url'=>$siteUrl,'inLanguage'=>'it-IT'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>
+    <?= json_encode(['@context'=>'https://schema.org','@type'=>'WebSite','name'=>'Finanza Facile','url'=>$siteUrl,'inLanguage'=>'it-IT'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -146,8 +156,13 @@ $siteUrl = SITE_URL;
         <!-- Intestazione -->
         <div class="flex items-center gap-3 mb-6 sans">
             <span class="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-gray-900">
+                <?php if ($categoriaAttiva !== ''): ?>
+                <i class="fas fa-tag text-blue-500 text-sm"></i>
+                <?= htmlspecialchars($categoriaAttiva) ?>
+                <?php else: ?>
                 <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
                 Ultime Notizie
+                <?php endif; ?>
             </span>
             <div class="flex-1 h-px bg-gray-200"></div>
         </div>

@@ -21,7 +21,7 @@ createApp({
             botOccupato: false,
             notifica: null,
             nuovaSorgente: { nome: '', url: '', tipo: 'rss' },
-            suggerimento: { titolo: '', categoria: 'Investimenti' },
+            suggerimento: { titolo: '', categoria: 'Investimenti', note: '' },
         };
     },
 
@@ -183,9 +183,10 @@ createApp({
                     azione: 'suggerisci_titolo',
                     titolo: this.suggerimento.titolo,
                     categoria: this.suggerimento.categoria,
+                    note: this.suggerimento.note,
                 });
                 this.mostraNotifica(r.data.tipo, r.data.messaggio);
-                this.suggerimento.titolo = '';
+                this.suggerimento = { titolo: '', categoria: this.suggerimento.categoria, note: '' };
                 await this.caricaTitoliCoda();
             } catch(e) {
                 this.mostraNotifica('error', e.response?.data?.messaggio || e.message);
@@ -202,9 +203,10 @@ createApp({
                     azione: 'suggerisci_titolo',
                     titolo: this.suggerimento.titolo,
                     categoria: this.suggerimento.categoria,
+                    note: this.suggerimento.note,
                 });
                 const titoloId = r.data.id;
-                this.suggerimento.titolo = '';
+                this.suggerimento = { titolo: '', categoria: this.suggerimento.categoria, note: '' };
                 await this.caricaTitoliCoda();
                 // 2. Genera subito
                 const r2 = await axios.post(`${API}/bot.php`, { azione: 'genera', titolo_id: titoloId });

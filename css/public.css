@@ -3,30 +3,42 @@
 /* ── PROSE CONTENT (corpo articolo) ─────────────────────── */
 .prose-content {
     font-size: 1.08rem;
-    line-height: 1.95;
+    line-height: 2;
     color: #374151;
     font-family: 'Georgia', serif;
 }
 
-.prose-content > * + * {
-    margin-top: 1.6rem;
-}
-
 .prose-content p {
     margin-top: 0;
-    margin-bottom: 1.6rem;
+    margin-bottom: 1.8rem;
 }
 
-.prose-content p + p {
-    margin-top: 0;
+.prose-content p:empty,
+.prose-content p:has(> br:only-child),
+.prose-content p > br:only-child {
+    display: block;
+    height: 0.8rem;
+    margin: 0;
+}
+
+.prose-content h1 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 900;
+    color: #111827;
+    margin-top: 3rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: .6rem;
+    border-bottom: 3px solid #3b82f6;
+    line-height: 1.25;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
 .prose-content h2 {
     font-size: clamp(1.35rem, 4vw, 1.75rem);
     font-weight: 800;
     color: #111827;
-    margin-top: 2.8rem;
-    margin-bottom: 1rem;
+    margin-top: 3rem;
+    margin-bottom: 1.1rem;
     padding-bottom: .5rem;
     border-bottom: 2px solid #e5e7eb;
     line-height: 1.3;
@@ -34,11 +46,11 @@
 }
 
 .prose-content h3 {
-    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
     font-weight: 700;
     color: #1f2937;
-    margin-top: 2.2rem;
-    margin-bottom: .75rem;
+    margin-top: 2.4rem;
+    margin-bottom: .85rem;
     line-height: 1.4;
     font-family: system-ui, -apple-system, sans-serif;
 }
@@ -47,8 +59,8 @@
     font-size: 1rem;
     font-weight: 700;
     color: #374151;
-    margin-top: 1.8rem;
-    margin-bottom: .5rem;
+    margin-top: 2rem;
+    margin-bottom: .6rem;
     font-family: system-ui, -apple-system, sans-serif;
 }
 

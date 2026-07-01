@@ -34,7 +34,7 @@ Fornisci SOLO un JSON valido con questa struttura (nessun testo prima o dopo):
         ];
     }
 
-    public function generaArticolo($titolo, $categoria, $approfondimento) {
+    public function generaArticolo($titolo, $categoria, $approfondimento, $note = '') {
         $contesto = json_encode($approfondimento, JSON_UNESCAPED_UNICODE);
 
         // Step A: metadati (JSON leggero, senza HTML)
@@ -66,21 +66,31 @@ Rispondi SOLO con questo JSON (nessun testo prima o dopo, usa SOLO virgolette do
         }
 
         // Step B: contenuto HTML come testo puro (non in JSON)
+        $noteSection = $note ? "\nISTRUZIONI SPECIFICHE DELL'AUTORE:\n$note\n" : '';
         $promptContent = "Sei un giornalista finanziario esperto. Scrivi un articolo di blog professionale in italiano.
 
 TITOLO: {$meta['titolo']}
 CATEGORIA: $categoria
-CONTESTO E DATI: $contesto
+CONTESTO E DATI: $contesto{$noteSection}
 
-ISTRUZIONI:
+ISTRUZIONI STRUTTURA:
+- Il titolo principale (H1) è già presente nella pagina: NON aggiungerlo nel corpo
+- Usa <h2> per i titoli delle sezioni principali (minimo 3, massimo 5 sezioni)
+- Usa <h3> per i sotto-argomenti all'interno di ogni sezione H2
+- Ogni sezione H2 deve contenere almeno 2-3 paragrafi <p>
+- Ogni paragrafo deve essere separato dagli altri con un paragrafo vuoto: <p>&nbsp;</p>
+- Struttura: breve introduzione (<p>) → sezioni H2 con H3 annidati → conclusione con call to action
+
+ISTRUZIONI FORMATO:
 - Lunghezza: 900-1200 parole
-- Formato: HTML con tag h2, h3, p, ul, li, strong
+- Ogni paragrafo di testo va racchiuso in tag <p>...</p>
+- Usa <strong> per evidenziare dati e termini chiave
+- Usa <ul><li> per elenchi puntati (massimo uno per sezione)
 - Tono: informativo, chiaro, autorevole ma accessibile
-- Struttura: introduzione coinvolgente → sviluppo con dati → conclusione con call to action
 - NON usare markdown, solo HTML puro
 - NON scrivere nulla prima del primo tag HTML e nulla dopo l'ultimo tag HTML
 
-Scrivi SOLO il corpo dell'articolo in HTML (inizia direttamente con <h2> o <p>):";
+Scrivi SOLO il corpo dell'articolo in HTML (inizia con <h2>):";
 
         $contenuto = trim($this->call($promptContent, 3000));
 

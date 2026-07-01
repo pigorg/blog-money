@@ -48,7 +48,7 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($articolo['titolo_finale']) ?> | Blog Money</title>
+    <title><?= htmlspecialchars($articolo['titolo_finale']) ?> | Finanza Facile</title>
     <meta name="description" content="<?= htmlspecialchars($articolo['meta_description'] ?? $articolo['excerpt'] ?? '') ?>">
     <?php if ($articolo['keywords']): ?>
     <meta name="keywords" content="<?= htmlspecialchars($articolo['keywords']) ?>">
@@ -59,7 +59,7 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
     <meta property="og:description" content="<?= htmlspecialchars($articolo['excerpt'] ?? '') ?>">
     <meta property="og:type" content="article">
     <meta property="og:url" content="<?= SITE_URL ?>/articolo/<?= $articolo['slug'] ?>">
-    <meta property="og:site_name" content="Blog Money">
+    <meta property="og:site_name" content="Finanza Facile">
     <meta property="article:published_time" content="<?= $dataISO ?>">
     <meta property="article:section" content="<?= htmlspecialchars($articolo['categoria']) ?>">
     <?php if ($articolo['immagine_url']): ?>
@@ -86,8 +86,8 @@ $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo
         'inLanguage'      => 'it-IT',
         'datePublished'   => $dataISO,
         'dateModified'    => $dataISO,
-        'author'          => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
-        'publisher'       => ['@type' => 'Organization', 'name' => 'Blog Money', 'url' => SITE_URL],
+        'author'          => ['@type' => 'Organization', 'name' => 'Finanza Facile', 'url' => SITE_URL],
+        'publisher'       => ['@type' => 'Organization', 'name' => 'Finanza Facile', 'url' => SITE_URL],
         'mainEntityOfPage'=> ['@type' => 'WebPage', '@id' => SITE_URL . '/articolo/' . $articolo['slug']],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
     </script>
