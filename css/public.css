@@ -104,6 +104,19 @@
     color: #1d4ed8;
 }
 
+.prose-content a.link-interno {
+    color: #2563eb;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: #3b82f6;
+    font-weight: 500;
+}
+
+.prose-content a.link-interno:hover {
+    text-decoration-style: solid;
+    color: #1d4ed8;
+}
+
 .prose-content blockquote {
     border-left: 4px solid #3b82f6;
     padding: 1.1rem 1.5rem;

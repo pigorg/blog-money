@@ -3,6 +3,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/Database.php';
 require_once __DIR__ . '/includes/Template.php';
+require_once __DIR__ . '/includes/LinkBuilder.php';
 
 $database = new Database();
 $database->connect();
@@ -40,6 +41,9 @@ $vs->execute();
 
 $template      = new Template($database);
 $rendered      = $template->renderArticolo($articolo);
+
+$linkBuilder           = new LinkBuilder($db);
+$articolo['contenuto'] = $linkBuilder->arricchisci($articolo['contenuto'], $articolo['id']);
 $dataLeggibile = $articolo['data_pubblicazione'] ? date('d M Y', strtotime($articolo['data_pubblicazione'])) : '';
 $dataISO       = $articolo['data_pubblicazione'] ? date('c', strtotime($articolo['data_pubblicazione'])) : '';
 ?>
