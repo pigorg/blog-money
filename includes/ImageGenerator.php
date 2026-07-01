@@ -25,34 +25,46 @@ class ImageGenerator {
             'n'      => 1,
         ]);
 
-        $ch = curl_init($this->endpoint);
-        curl_setopt_array($ch, [
-            CURLOPT_HTTPHEADER     => [
-                'Authorization: Bearer ' . $this->apiKey,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 60,
-        ]);
+        $maxTentativi = 4;
+        $attesa       = 2; // secondi, raddoppia ad ogni tentativo
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        for ($tentativo = 1; $tentativo <= $maxTentativi; $tentativo++) {
+            $ch = curl_init($this->endpoint);
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Bearer ' . $this->apiKey,
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $payload,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 60,
+            ]);
 
-        if (!$response || $httpCode !== 200) {
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200) {
+                $data     = json_decode($response, true);
+                $imageUrl = $data['data'][0]['url'] ?? null;
+                if (!$imageUrl) {
+                    throw new Exception('Nessun URL immagine nella risposta API');
+                }
+                return $this->scaricaESalva($imageUrl);
+            }
+
+            // Rate limit (429): aspetta con backoff esponenziale e riprova
+            if ($httpCode === 429 && $tentativo < $maxTentativi) {
+                sleep($attesa);
+                $attesa *= 2;
+                continue;
+            }
+
             throw new Exception("Image API error ($httpCode): $response");
         }
 
-        $data     = json_decode($response, true);
-        $imageUrl = $data['data'][0]['url'] ?? null;
-
-        if (!$imageUrl) {
-            throw new Exception('Nessun URL immagine nella risposta API');
-        }
-
-        return $this->scaricaESalva($imageUrl);
+        throw new Exception('Image API: troppi tentativi falliti (rate limit persistente)');
     }
 
     private function scaricaESalva($url) {
